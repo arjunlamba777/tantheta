@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starboy - For You</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --red: #FF0000;
+            --black: #000000;
+            --gold: #FFD700;
+            --neon-pink: #FF006E;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--black);
+            color: white;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        /* Cassette Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--black);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+        
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .cassette {
+            width: 300px;
+            height: 200px;
+            background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(255, 0, 0, 0.3);
+            border: 2px solid var(--red);
+        }
+        
+        .cassette::before,
+        .cassette::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #333 30%, #111 70%);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 3px solid var(--gold);
+        }
+        
+        .cassette::before {
+            left: 30px;
+            animation: spinCassette 2s linear infinite;
+        }
+        
+        .cassette::after {
+            right: 30px;
+            animation: spinCassette 2s linear infinite reverse;
+        }
+        
+        @keyframes spinCassette {
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+        
+        .loading-text {
+            margin-top: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--neon-pink);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+        
+        .loading-percentage {
+            margin-top: 10px;
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--red);
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        /* Floating Stars and Hearts */
+        .floating-element {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.6;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+        
+        .star {
+            color: var(--gold);
+            font-size: 20px;
+            animation-name: floatRightToLeft;
+        }
+        
+        .heart {
+            color: var(--neon-pink);
+            font-size: 20px;
+            animation-name: floatLeftToRight;
+        }
+        
+        @keyframes floatRightToLeft {
+            from {
+                transform: translateX(100vw) rotate(0deg);
+            }
+            to {
+                transform: translateX(-100px) rotate(360deg);
+            }
+        }
+        
+        @keyframes floatLeftToRight {
+            from {
+                transform: translateX(-100px) rotate(0deg);
+            }
+            to {
+                transform: translateX(100vw) rotate(-360deg);
+            }
+        }
+        
+        /* Vinyl Record Navigation */
+        .vinyl-nav {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 150px;
+            height: 150px;
+            z-index: 1000;
+        }
+        
+        .vinyl-record {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, 
+                var(--black) 0%, 
+                var(--black) 20%, 
+                #1a1a1a 20%, 
+                #1a1a1a 22%,
+                var(--black) 22%,
+                var(--black) 40%,
+                #2a2a2a 40%,
+                var(--black) 100%
+            );
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(255, 0, 0, 0.5);
+            border: 3px solid var(--red);
+            transition: transform 0.1s linear;
+        }
+        
+        .vinyl-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: var(--red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 18px;
+            color: var(--gold);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        .vinyl-tracks {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+        }
+        
+        .track-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--gold);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--gold);
+        }
+        
+        .track-dot:hover {
+            transform: scale(1.5);
+            background: var(--neon-pink);
+            box-shadow: 0 0 20px var(--neon-pink);
+        }
+        
+        .track-dot.active {
+            background: var(--red);
+            box-shadow: 0 0 20px var(--red);
+            transform: scale(1.3);
+        }
+        
+        /* Progress Indicator */
+        .progress-ring {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            width: 160px;
+            height: 160px;
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            fill: none;
+            stroke: var(--neon-pink);
+            stroke-width: 4;
+            stroke-dasharray: 502;
+            stroke-dashoffset: 502;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+        
+        /* Main Sections */
+        .section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 20px;
+            position: relative;
+            scroll-snap-align: start;
+        }
+        
+        .scroll-container {
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            height: 100vh;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 72px;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 48px;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            margin-bottom: 30px;
+        }
+        
+        /* Section 1: Starboy Landing */
+        #starboy {
+            background: linear-gradient(135deg, var(--black) 0%, #1a0000 100%);
+        }
+        
+        .glitch {
+            position: relative;
+            color: var(--red);
+            animation: glitch 3s infinite;
+        }
+        
+        @keyframes glitch {
+            0%, 90%, 100% {
+                text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--gold);
+            }
+            95% {
+                text-shadow: -5px 5px var(--neon-pink), 5px -5px var(--gold);
+            }
+        }
+        
+        .subtitle {
+            font-size: 24px;
+            color: var(--gold);
+            letter-spacing: 4px;
+            margin-top: 20px;
+        }
+        
+        /* Section 2: Video */
+        #video-section {
+            background: linear-gradient(135deg, #0a0000 0%, var(--black) 100%);
+        }
+        
+        .video-container {
+            width: 80%;
+            max-width: 900px;
+            aspect-ratio: 16/9;
+            background: #1a1a1a;
+            border: 3px solid var(--red);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(255, 0, 0, 0.4);
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a1a, #0a0000);
+        }
+        
+        .play-button {
+            width: 100px;
+            height: 100px;
+            background: var(--red);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+        }
+        
+        .play-button:hover {
+            transform: scale(1.1);
+            background: var(--neon-pink);
+            box-shadow: 0 0 50px rgba(255, 0, 110, 0.8);
+        }
+        
+        .play-button::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 30px solid white;
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            margin-left: 8px;
+        }
+        
+        /* Section 3: About */
+        #about {
+            background: linear-gradient(135deg, var(--black) 0%, #1a001a 100%);
+        }
+        
+        .content-box {
+            max-width: 800px;
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid var(--red);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .content-box p {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        /* Section 4: Secrets */
+        #secrets {
+            background: linear-gradient(135deg, #0a0a0a 0%, #001a1a 100%);
+        }
+        
+        .secrets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin-top: 40px;
+        }
+        
+        .secret-card {
+            background: linear-gradient(135deg, #1a1a1a, #0a0000);
+            padding: 30px;
+            border: 2px solid var(--gold);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .secret-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--neon-pink);
+            box-shadow: 0 10px 40px rgba(255, 0, 110, 0.4);
+        }
+        
+        .secret-card h3 {
+            color: var(--gold);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .secret-card p {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+        
+        /* Section 5: Timeline */
+        #timeline {
+            background: linear-gradient(135deg, var(--black) 0%, #1a1a00 100%);
+        }
+        
+        .timeline-container {
+            max-width: 900px;
+            margin-top: 40px;
+        }
+        
+        .timeline-item {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: flex-start;
+        }
+        
+        .timeline-date {
+            min-width: 150px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            color: var(--gold);
+            font-weight: 700;
+        }
+        
+        .timeline-content {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 20px;
+            border-left: 4px solid var(--gold);
+            border-radius: 8px;
+        }
+        
+        .timeline-content h3 {
+            color: var(--neon-pink);
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        
+        .timeline-content p {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #ddd;
+        }
+        
+        /* Section 6: The Question */
+        #question {
+            background: linear-gradient(135deg, #1a0000 0%, var(--black) 100%);
+        }
+        
+        .question-box {
+            text-align: center;
+            padding: 60px;
+            background: rgba(255, 0, 0, 0.15);
+            border: 3px solid var(--red);
+            border-radius: 20px;
+            max-width: 700px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(255, 0, 0, 0.8);
+            }
+        }
+        
+        .question-text {
+            font-size: 36px;
+            color: var(--gold);
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+        }
+        
+        .answer-button {
+            padding: 20px 60px;
+            font-size: 28px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        
+        .yes-button {
+            background: var(--red);
+            color: white;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.5);
+        }
+        
+        .yes-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 50px rgba(255, 0, 0, 0.8);
+        }
+        
+        .no-button {
+            background: #333;
+            color: #999;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .no-button:hover {
+            animation: runAway 0.3s ease;
+        }
+        
+        @keyframes runAway {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(50px) translateY(-30px); }
+            50% { transform: translateX(-50px) translateY(30px); }
+            75% { transform: translateX(60px) translateY(-40px); }
+            100% { transform: translateX(-60px) translateY(40px); }
+        }
+        
+        /* Section 7: Afterword */
+        #afterword {
+            background: linear-gradient(135deg, var(--black) 0%, #0a0a1a 100%);
+        }
+        
+        .easter-egg {
+            text-align: center;
+            max-width: 800px;
+        }
+        
+        .easter-egg h2 {
+            color: var(--neon-pink);
+            margin-bottom: 30px;
+        }
+        
+        .easter-egg p {
+            font-size: 22px;
+            line-height: 1.8;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .hidden-message {
+            margin-top: 40px;
+            padding: 30px;
+            background: rgba(255, 0, 110, 0.1);
+            border: 2px dashed var(--neon-pink);
+            border-radius: 10px;
+            font-style: italic;
+            color: var(--gold);
+            font-size: 18px;
+        }
+        
+        /* Music Toggle */
+        .music-toggle {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: var(--red);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 0, 0, 0.5);
+        }
+        
+        .music-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(255, 0, 0, 0.7);
+        }
+        
+        .music-toggle svg {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="cassette"></div>
+        <div class="loading-text">Loading...</div>
+        <div class="loading-percentage">0%</div>
+    </div>
+    
+    <!-- Floating Elements Container -->
+    <div id="floating-elements"></div>
+    
+    <!-- Music Toggle -->
+    <div class="music-toggle" onclick="toggleMusic()">
+        <svg viewBox="0 0 24 24">
+            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+        </svg>
+    </div>
+    
+    <!-- Vinyl Navigation -->
+    <div class="vinyl-nav">
+        <svg class="progress-ring" width="160" height="160">
+            <circle class="progress-ring-circle" stroke-width="4" fill="transparent" r="80" cx="80" cy="80"/>
+        </svg>
+        <div class="vinyl-record" id="vinyl">
+            <div class="vinyl-center" id="track-number">1</div>
+            <div class="vinyl-tracks">
+                <div class="track-dot active" style="top: 10%; left: 50%; transform: translate(-50%, -50%);" onclick="scrollToSection(0)"></div>
+                <div class="track-dot" style="top: 25%; right: 15%; transform: translate(50%, -50%);" onclick="scrollToSection(1)"></div>
+                <div class="track-dot" style="top: 50%; right: 5%; transform: translate(50%, -50%);" onclick="scrollToSection(2)"></div>
+                <div class="track-dot" style="bottom: 25%; right: 15%; transform: translate(50%, 50%);" onclick="scrollToSection(3)"></div>
+                <div class="track-dot" style="bottom: 10%; left: 50%; transform: translate(-50%, 50%);" onclick="scrollToSection(4)"></div>
+                <div class="track-dot" style="bottom: 25%; left: 15%; transform: translate(-50%, 50%);" onclick="scrollToSection(5)"></div>
+                <div class="track-dot" style="top: 50%; left: 5%; transform: translate(-50%, -50%);" onclick="scrollToSection(6)"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="scroll-container" id="scroll-container">
+        <!-- Section 1: Starboy -->
+        <section class="section" id="starboy">
+            <h1 class="glitch">STARBOY</h1>
+            <p class="subtitle">A Journey Through the Stars</p>
+        </section>
+        
+        <!-- Section 2: I Feel It Coming -->
+        <section class="section" id="video-section">
+            <h2>I Feel It Coming</h2>
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="play-button" onclick="playVideo()"></div>
+                    <p style="margin-top: 20px; color: var(--gold); font-size: 18px;">Click to play our story</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 3: Die For You -->
+        <section class="section" id="about">
+            <h2>Die For You</h2>
+            <div class="content-box">
+                <p>You are the light in my darkest nights, the star that guides me home.</p>
+                <p>Every moment with you feels like I'm living in a dream I never want to wake up from.</p>
+                <p>You've changed my world in ways words can't even begin to describe.</p>
+            </div>
+        </section>
+        
+        <!-- Section 4: Secrets -->
+        <section class="section" id="secrets">
+            <h2>Secrets</h2>
+            <div class="secrets-grid">
+                <div class="secret-card">
+                    <h3>⭐ Secret #1</h3>
+                    <p>I still remember the first time I saw you smile. Time literally stopped.</p>
+                </div>
+                <div class="secret-card">
+                    <h3>💝 Secret #2</h3>
+                    <p>Your laugh is my favorite sound in the entire universe.</p>
+                </div>
+                <div class="secret-card">
+                    <h3>🌙 Secret #3</h3>
+                    <p>I play our song on repeat when you're not around.</p>
+                </div>
+                <div class="secret-card">
+                    <h3>✨ Secret #4</h3>
+                    <p>You inspire me to be better every single day.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 5: Reminder - Timeline -->
+        <section class="section" id="timeline">
+            <h2>Reminder</h2>
+            <div class="timeline-container">
+                <div class="timeline-item">
+                    <div class="timeline-date">Day One</div>
+                    <div class="timeline-content">
+                        <h3>The Beginning</h3>
+                        <p>The moment everything changed. I knew you were special.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">First Week</div>
+                    <div class="timeline-content">
+                        <h3>Getting to Know You</h3>
+                        <p>Every conversation felt like discovering a new universe.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">First Month</div>
+                    <div class="timeline-content">
+                        <h3>Falling Deeper</h3>
+                        <p>Realized I couldn't imagine my life without you in it.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Today</div>
+                    <div class="timeline-content">
+                        <h3>The Question</h3>
+                        <p>Ready to take the leap and ask what my heart has known all along...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 6: True Colors - The Question -->
+        <section class="section" id="question">
+            <h2>True Colors</h2>
+            <div class="question-box">
+                <p class="question-text">Will you be mine?</p>
+                <div class="button-container">
+                    <button class="answer-button yes-button" onclick="handleYes()">YES</button>
+                    <button class="answer-button no-button" onmouseover="runAway(this)">NO</button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 7: Afterword -->
+        <section class="section" id="afterword">
+            <div class="easter-egg">
+                <h2>★ Bonus Track ★</h2>
+                <p>You found the hidden track! Just like in the old albums...</p>
+                <p>Thank you for scrolling through this journey with me.</p>
+                <div class="hidden-message">
+                    "In a world of temporary things, you are a perpetual feeling."
+                    <br><br>
+                    - Forever Yours
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        // Loading Screen
+        let loadingPercentage = 0;
+        const loadingScreen = document.getElementById('loading-screen');
+        const percentageDisplay = document.querySelector('.loading-percentage');
+        
+        const loadingInterval = setInterval(() => {
+            loadingPercentage += Math.random() * 15;
+            if (loadingPercentage >= 100) {
+                loadingPercentage = 100;
+                percentageDisplay.textContent = '100%';
+                setTimeout(() => {
+                    loadingScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }, 300);
+                clearInterval(loadingInterval);
+            } else {
+                percentageDisplay.textContent = Math.floor(loadingPercentage) + '%';
+            }
+        }, 150);
+        
+        // Create Floating Stars and Hearts
+        function createFloatingElements() {
+            const container = document.getElementById('floating-elements');
+            
+            // Create 15 stars
+            for (let i = 0; i < 15; i++) {
+                const star = document.createElement('div');
+                star.className = 'floating-element star';
+                star.innerHTML = '⭐';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.animationDuration = (20 + Math.random() * 20) + 's';
+                star.style.animationDelay = Math.random() * 5 + 's';
+                star.style.fontSize = (15 + Math.random() * 15) + 'px';
+                container.appendChild(star);
+            }
+            
+            // Create 15 hearts
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-element heart';
+                heart.innerHTML = '💖';
+                heart.style.top = Math.random() * 100 + 'vh';
+                heart.style.animationDuration = (20 + Math.random() * 20) + 's';
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                heart.style.fontSize = (15 + Math.random() * 15) + 'px';
+                container.appendChild(heart);
+            }
+        }
+        
+        createFloatingElements();
+        
+        // Vinyl Rotation on Scroll
+        const vinyl = document.getElementById('vinyl');
+        const scrollContainer = document.getElementById('scroll-container');
+        const progressCircle = document.querySelector('.progress-ring-circle');
+        const trackNumber = document.getElementById('track-number');
+        const trackDots = document.querySelectorAll('.track-dot');
+        const sections = document.querySelectorAll('.section');
+        
+        let rotation = 0;
+        
+        scrollContainer.addEventListener('scroll', () => {
+            const scrollTop = scrollContainer.scrollTop;
+            const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+            const scrollPercentage = scrollTop / scrollHeight;
+            
+            // Rotate vinyl
+            rotation = scrollPercentage * 720; // 2 full rotations
+            vinyl.style.transform = `rotate(${rotation}deg)`;
+            
+            // Update progress ring
+            const offset = 502 - (scrollPercentage * 502);
+            progressCircle.style.strokeDashoffset = offset;
+            
+            // Update active section
+            let currentSection = 0;
+            sections.forEach((section, index) => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
+                    currentSection = index;
+                }
+            });
+            
+            trackNumber.textContent = currentSection + 1;
+            
+            // Update active track dot
+            trackDots.forEach((dot, index) => {
+                if (index === currentSection) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        });
+        
+        // Scroll to Section
+        function scrollToSection(index) {
+            sections[index].scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Video Play Button
+        function playVideo() {
+            alert('This would play your multi-day video compilation! Replace this with your actual video embed.');
+            // You can replace this with actual video player code:
+            // const videoContainer = document.querySelector('.video-placeholder');
+            // videoContainer.innerHTML = '<iframe width="100%" height="100%" src="YOUR_VIDEO_URL" frameborder="0" allowfullscreen></iframe>';
+        }
+        
+        // Yes Button Handler
+        function handleYes() {
+            // Create confetti or celebration effect
+            const questionBox = document.querySelector('.question-box');
+            questionBox.innerHTML = '<h2 style="color: var(--gold); font-size: 48px; animation: pulse 1s ease-in-out infinite;">You just made me the happiest person alive! ❤️⭐</h2>';
+            
+            // Optional: trigger celebration effects
+            setTimeout(() => {
+                alert('🎉 I love you so much! 🎉');
+            }, 500);
+        }
+        
+        // No Button Run Away
+        function runAway(button) {
+            const maxX = window.innerWidth - button.offsetWidth - 100;
+            const maxY = window.innerHeight - button.offsetHeight - 100;
+            
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY;
+            
+            button.style.position = 'fixed';
+            button.style.left = randomX + 'px';
+            button.style.top = randomY + 'px';
+        }
+        
+        // Music Toggle (Placeholder)
+        let musicPlaying = false;
+        function toggleMusic() {
+            musicPlaying = !musicPlaying;
+            if (musicPlaying) {
+                alert('🎵 Music would play here! Add your Starboy album tracks or a playlist link.');
+                // You can add actual audio player code here
+            } else {
+                alert('🔇 Music paused');
+            }
+        }
+    </script>
+</body>
+</html>
